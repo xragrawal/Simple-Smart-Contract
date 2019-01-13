@@ -5,11 +5,11 @@ contract moreBanking {
     mapping (address => uint) private balances;
     address public owner;
 
-  // Log the event about a deposit being made by an address and its amount
+    event LogEnrollmentMade(uint clientCount, address indexed accountAddress, uint amount);
     event LogDepositMade(address indexed accountAddress, uint amount);
 
-    // Constructor is "payable" so it can receive the initial funding of 30, 
-    // required to reward the first 3 clients
+    // The keyword payable is required for the Constructor / function to be able to receive Ether/tokens
+    // Here Constructor is "payable" to receive the initial funding of 30 Ethers to reward the first 3 clients
     constructor() public payable {
         require(msg.value == 30 ether, "30 ether initial funding required");
         /* Set the owner to the creator of this contract */
@@ -17,12 +17,13 @@ contract moreBanking {
         clientCount = 0;
     }
 
-    // Enroll a customer with the bank, giving the first 3 of them 0.1 ether as reward
+    // Enroll a customer with the bank, giving the first 3 of them 10 ether as reward
     // @return the balance of the user after enrolling
     function enroll() public returns (uint) {
         if (clientCount < 3) {
             clientCount++;
             balances[msg.sender] = 10 ether;
+        emit LogEnrollmentMade(clientCount, msg.sender, balances[msg.sender]);
         }
         return balances[msg.sender];
     }
@@ -46,14 +47,13 @@ contract moreBanking {
         return balances[msg.sender];
     }
 
-    // @notice Just reads balance of the account requesting, so "constant"
     // @return The balance of the user
-    function balance() public view returns (uint) {
+    function userBalance() public view returns (uint) {
         return balances[msg.sender];
     }
 
-    // @return The balance of the Simple Bank contract
-    function depositsBalance() public view returns (uint) {
-        return address(this).balance;
+    // @return The balance of the moreBanking contract
+    function contractBalance() public view returns (uint) {
+        return address(this).balance; // Reading balance of the contract
     }
 }
